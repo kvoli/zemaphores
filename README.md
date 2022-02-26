@@ -5,7 +5,7 @@ The book is available for free [here](https://greenteapress.com/wp/semaphores/).
 
 ## Completion
 
-- [ ] chapter 1
+- [x] chapter 1
 - [ ] chapter 2
 - [ ] chapter 3
 - [ ] chapter 4
