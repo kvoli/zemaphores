@@ -9,34 +9,34 @@ const std = @import("std");
 //    a2      b2
 //
 const Thread = std.Thread;
-const Semaphore = @import("semaphore.zig").Semaphore;
+const Semaphore = Thread.Semaphore;
 
 var log = std.ArrayList(i32).init(std.testing.allocator);
 
 const Signaller = struct {
-    sem: Semaphore = .{},
+    sem: *Semaphore = .{},
     name: []const u8,
 
     fn f(self: *Signaller, other: *Semaphore) anyerror!void {
         std.debug.print("\nstatement {s}1\n", .{self.name});
         try log.append(1);
-        try other.inc();
-        try self.sem.dec();
+        self.sem.post();
+        other.wait();
         std.debug.print("\nstatement {s}2\n", .{self.name});
         try log.append(2);
     }
 };
 
-var semA = Semaphore{ .tickets = 0 };
-var semB = Semaphore{ .tickets = 0 };
+var semA = Semaphore{};
+var semB = Semaphore{};
 
 fn a() anyerror!void {
-    var sigA: Signaller = Signaller{ .sem = semA, .name = "a" };
+    var sigA: Signaller = Signaller{ .sem = &semA, .name = "a" };
     try sigA.f(&semB);
 }
 
 fn b() anyerror!void {
-    var sigB: Signaller = Signaller{ .sem = semB, .name = "b" };
+    var sigB: Signaller = Signaller{ .sem = &semB, .name = "b" };
     try sigB.f(&semA);
 }
 
