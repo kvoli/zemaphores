@@ -33,16 +33,15 @@ const Barrier = struct {
         std.time.sleep(100000);
 
         if (b.waiting == b.threads - 1) {
-            std.debug.print("\ncaller unlocks {}\n", .{id});
             b.waiting = 0;
             try b.sem.inc();
-            b.mu.unlock();
+            std.debug.print("\ncaller unlocks {}\n", .{id});
         } else {
             b.waiting += 1;
-            b.mu.unlock();
-            std.debug.print("\ncaller waiting {}\n", .{id});
         }
+        b.mu.unlock();
 
+        std.debug.print("\n turnstile {}, tickets {}\n", .{ id, b.sem.tickets });
         try b.sem.dec();
         try b.sem.inc();
     }
