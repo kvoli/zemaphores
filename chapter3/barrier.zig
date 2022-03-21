@@ -35,14 +35,15 @@ const Barrier = struct {
         if (b.waiting == b.threads - 1) {
             std.debug.print("\ncaller unlocks {}\n", .{id});
             b.waiting = 0;
+            try b.sem.inc();
             b.mu.unlock();
         } else {
             b.waiting += 1;
             b.mu.unlock();
             std.debug.print("\ncaller waiting {}\n", .{id});
-            try b.sem.dec();
         }
 
+        try b.sem.dec();
         try b.sem.inc();
     }
 };
