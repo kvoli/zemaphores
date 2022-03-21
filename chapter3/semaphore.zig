@@ -63,7 +63,8 @@ pub const Semaphore = struct {
     mu: Mutex = .{},
     cond: Condition = .{},
 
-    pub fn inc(self: *Semaphore) anyerror!void {
+    // Acquire a ticket
+    pub fn dec(self: *Semaphore) anyerror!void {
         self.mu.lock();
         defer self.mu.unlock();
 
@@ -77,7 +78,8 @@ pub const Semaphore = struct {
         }
     }
 
-    pub fn dec(self: *Semaphore) anyerror!void {
+    // Drop a ticket
+    pub fn inc(self: *Semaphore) anyerror!void {
         self.mu.lock();
         defer self.mu.unlock();
 

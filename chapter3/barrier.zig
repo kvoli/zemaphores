@@ -26,27 +26,34 @@ const Barrier = struct {
         };
     }
 
-    fn wait(b: *Barrier) anyerror!void {
+    fn wait(b: *Barrier, id: i32) anyerror!void {
         b.mu.lock();
-        std.debug.print("{}/{}\n", .{ b.waiting, b.threads });
-        if (b.waiting >= b.threads - 1) {
-            try b.sem.inc();
+
+        std.debug.print("\n{}/{} - caller {}\n", .{ b.waiting, b.threads, id });
+        std.time.sleep(100000);
+
+        if (b.waiting == b.threads - 1) {
+            std.debug.print("\ncaller unlocks {}\n", .{id});
+            b.waiting = 0;
             b.mu.unlock();
         } else {
             b.waiting += 1;
             b.mu.unlock();
+            std.debug.print("\ncaller waiting {}\n", .{id});
             try b.sem.dec();
         }
+
+        try b.sem.inc();
     }
 };
 
 fn testfn(b: *Barrier, id: i32) void {
-    b.wait() catch @panic("error waiting");
-    std.debug.print("{} in", .{id});
+    b.wait(id) catch @panic("error waiting");
+    std.debug.print("{} in\n", .{id});
 }
 
 test "should wait" {
-    comptime var b = Barrier.init(3);
+    var b = Barrier.init(3);
 
     var threadA = try Thread.spawn(.{}, testfn, .{ &b, 0 });
     var threadB = try Thread.spawn(.{}, testfn, .{ &b, 1 });
